@@ -1,0 +1,323 @@
+<html>
+<head><h1>Problema da Moeda
+<input type="image" src="um-real.png" alt="Submit" width="92" height="64"></br></h1>
+<script src="js/jquery-3.1.1.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="css/w3.min.css">
+<link rel="stylesheet" href="css/w3-theme-amber.min.css">
+<link rel="stylesheet" href="css/font-awesome.min.css">
+<style>
+  .circle {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border-style: solid;
+    display: inline-block;
+    padding: 7px;
+    min-width: 40px;
+    text-align: center;
+    margin: 5px;
+    background: #F2F21C
+  }
+  h2{
+    font-size: 20px;
+  }
+
+  h3{
+    font-size: 15px;
+    float: left;
+    font-weight: bold;
+  }
+  .input {
+    width: 40%;
+  }
+
+  .content {
+    margin-left: 100px;
+    width: 1000px;
+
+    font-size: 12px;
+
+  }
+
+  .array{
+
+    margin-left: 100px;
+    width: 80%;
+
+  }
+
+  #buttonDinamico {
+    margin: 20 auto;
+    margin-left: 10px;
+    width: 100px;
+    height: 50px;
+  }
+
+  #buttonGuloso {
+    margin: 20 auto;
+    margin-left: 0px;
+    width: 100px;
+    height: 50px;
+  }
+
+  #buttonCombinations{
+    white-space: normal;
+    font-size: 10px;
+    margin: 20 auto;
+    margin-left: 70px;
+    width: 100px;
+    height: 50px;
+  }
+
+  #buttonClear{
+    margin: 20 auto;
+    margin-left: 0px;
+    width: 100px;
+    height: 50px;
+  }
+
+</style>
+
+<script>
+  var intervalo = null;
+  var proximaPosicao = 0;
+
+  var resultadoMoedaGuloso;
+  var resultadoMoedaDinamico;
+
+  $(document).ready(function(){
+      $("#buttonDinamico").click(function(){
+
+          var quantidade = parseInt($("#inputValor").val());
+          var moedas  = new Array();
+
+          var inputMoedas = $("#inputMoedas").val();
+          inputMoedas.split(",").forEach(function(coin) {
+            moedas.push(coin);
+          });
+
+          clearBox('array');
+          resultadoMoedaDinamico = algoritmoDinamico(quantidade, moedas);
+          print(novasmoedasLayout(quantidade, moedas));
+          imprimeResultadoDinamico(quantidade, moedas);
+      });
+
+      $("#buttonGuloso").click(function(){
+
+          var quantidade = parseInt($("#inputValor").val());
+          var moedas  = new Array();
+
+          var inputMoedas = $("#inputMoedas").val();
+          inputMoedas.split(",").forEach(function(coin) {
+            moedas.push(coin);
+          });
+
+          clearBox('array');
+          resultadoMoedaGuloso  = algoritmoGuloso(quantidade, moedas);
+          print(novasmoedasLayout(quantidade, moedas));
+          imprimeResultadoGuloso(quantidade, moedas);//mudar
+      });
+
+      $("#buttonClear").click(function(){ //funcao para limpar a tela
+        clearBox('array');
+      });
+
+      $("#buttonCombinations").click(function(){ //funcao que mostra todas as combinacoes
+
+        var quantidade = parseInt($("#inputValor").val());
+        var moedas  = new Array();
+
+        var inputMoedas = $("#inputMoedas").val();
+        inputMoedas.split(",").forEach(function(coin) {
+          moedas.push(coin);
+        });
+        var tamanho = moedas.length;
+
+        clearBox('array');
+        getCombinations(quantidade, [], 0, moedas, tamanho, 0);
+      });
+
+
+  });
+
+   function clearBox(elementID)
+   {
+    document.getElementById(elementID).innerHTML = "";
+   }
+
+   function clearBody()
+   {
+    document.body.innerHTML = "";
+   }
+
+
+
+
+  function imprimeResultadoDinamico(quantidade, moedas) {
+    imprimeResultadoAlgDinamico();
+  }
+
+  function imprimeResultadoGuloso(quantidade, moedas) {
+    imprimeResultadoAlgGuloso();
+  }
+
+  function imprimeResultadoAlgDinamico() {
+    print("<h2>Algoritmo Dinâmico</h2>");
+    print("<h3>Valor Total:</br>Quantidade Moedas:</h3>");
+    intervalo = setInterval(imprimeVetorDinamico, 0);
+  }
+
+  function imprimeVetorDinamico() {
+    if (proximaPosicao < (resultadoMoedaDinamico.length)) {
+      print(novoCirculoDinamico(proximaPosicao, resultadoMoedaDinamico[proximaPosicao++].moedaQuantidade));
+    } else {
+      clearInterval(intervalo);
+
+    }
+  }
+
+  function imprimeResultadoAlgGuloso() {
+    proximaPosicao = 0;
+    print("<br/><h2>Algoritmo Guloso</h2>");
+    print("<h3>Resultado da combinacao:</br>Valor:</br>Quantidade:</h3></br></br>");
+    intervalo = setInterval(imprimeVetorGuloso, 50);
+  }
+
+  function imprimeVetorGuloso() {
+    if (proximaPosicao < (resultadoMoedaGuloso.length)) {
+      print(novoCirculoGuloso(resultadoMoedaGuloso[proximaPosicao].valorMoeda, resultadoMoedaGuloso[proximaPosicao++].moedaQuantidade));
+    } else {
+      clearInterval(intervalo);
+    }
+  }
+
+  function algoritmoGuloso(quantidade, moedas) {
+    var resultadoMoedaGuloso = new Array();
+
+    for (i = moedas.length - 1; i >= 0; i--) {
+      resultadoMoedaGuloso[i] = new Object();
+      var numberOfmoedas = parseInt(parseInt(quantidade) / parseInt(moedas[i]));
+
+      quantidade -= numberOfmoedas * moedas[i];
+
+      resultadoMoedaGuloso[i].moedaQuantidade = numberOfmoedas;
+      resultadoMoedaGuloso[i].valorMoeda = moedas[i];
+    }
+
+    return resultadoMoedaGuloso;
+  }
+
+  function algoritmoDinamico(quantidade, moedas) {
+    var resultadoMoedaDinamico = new Array();
+
+    for (i = 0; i < quantidade + 1; i++) {
+      resultadoMoedaDinamico[i] = new Object();
+      resultadoMoedaDinamico[i].moedaQuantidade = 0;
+      resultadoMoedaDinamico[i].valorMoeda = 0;
+    }
+
+    var CC = new Array(moedas.length);
+
+    for (var amt = 1; amt <= quantidade; amt++) {
+      // Zera todos os CC
+      for (var j = 0; j < CC.length; j++) {
+          CC[j] = -1;
+      }
+
+      for (var j = 0; j < moedas.length; j++) {
+          if (moedas[j] <= amt) {
+              CC[j] = resultadoMoedaDinamico[amt - moedas[j]].moedaQuantidade + 1;
+          }
+      }
+
+      resultadoMoedaDinamico[amt].moedaQuantidade = -1;
+
+      for (var j = 0; j < CC.length; j++) {
+
+        if (CC[j] > 0 && (resultadoMoedaDinamico[amt].moedaQuantidade === -1 || resultadoMoedaDinamico[amt].moedaQuantidade > CC[j])) {
+            resultadoMoedaDinamico[amt].moedaQuantidade = CC[j];
+            resultadoMoedaDinamico[amt].valorMoeda = moedas[j];
+        }
+      }
+    }
+
+    return resultadoMoedaDinamico;
+  }
+
+  function print(value) {
+    $("#array").append(value);
+  }
+
+  function novoCirculoGuloso(position, numberOfmoedas) {
+    var inside = "<div></br>" + position + "</div>";
+    return numberOfmoedas + "<div class=\"circle\" id=circle" + position + ">" + inside + "</div>";
+  }
+
+  function novoCirculoDinamico(position, numberOfmoedas) {
+    var inside = "<div>" + position + "</div><div>" + numberOfmoedas + "</div>";
+    return "<div class=\"circle\" id=circle" + position + ">" + inside + "</div>";
+  }
+
+  function novasmoedasLayout(quantidade, moedas) {
+    if (moedas.length == 0) return "";
+
+    var layout = "";
+    print("<div><h2>Moedas:");
+    moedas.forEach(function(item) {
+
+      print(novoCirculoDinamico(item, ""))
+    });
+
+
+    return layout.substring(0, layout.length - 2) + "</h2></br><h2>Valor: " + quantidade + "</h2></div>";
+  }
+
+  function getCombinations(quantidade, list, start, moedas, tamanho, count){
+
+    for (var i = start; i < tamanho; i++) {
+        count++;
+        var remain = quantidade - moedas[i];
+        var list2 = list.slice(0); // copy array
+        list2.push(moedas[i]);
+        if (count == 1){
+            print("<h1> Combinacoes Possiveis </h1>");
+            print("<b> Valor:  </b>" + quantidade + "<br />");
+        }
+
+        if (remain < 0) {
+            return;
+        }
+
+        if (remain == 0) {
+           print(list2 + "<br />");
+           print("<b> Numero de Moedas: </b>" + list2.length + "<br />");
+            return;
+        }
+        else {
+            getCombinations(remain, list2, i, moedas, tamanho, count);
+        }
+    }
+  }
+
+
+</script>
+</head>
+<body class="w3-padding">
+  <div class="content">
+      <h4>Informe os possiveis valores para cada moeda:</h4>
+      <input type="text" class="w3-grey w3-border-0 w3-padding input" id="inputMoedas" value="1,5,10"/><br/>
+      <h4>Valor a ser calculado:</h4>
+      <input type="text" class="w3-grey w3-border-0 w3-padding input" id="inputValor" value="25"/><br/>
+    </div>
+    <div class="buttonDiv">
+      <input type="button" class="w3-btn w3-indigo w3-padding w3-margin-right" id="buttonCombinations" value="Combinacoes Possiveis"/>
+      <input type="button" class="w3-btn w3-indigo w3-padding w3-margin-right" id="buttonDinamico" value="Dinamico"/>
+      <input type="button" class="w3-btn w3-indigo w3-padding w3-margin-right" id="buttonGuloso" value="Guloso"/>
+      <input type="button" class="w3-btn w3-indigo w3-padding w3-margin-right" id="buttonClear" value="Limpa"/>
+
+    </div>
+    <div class="array" id="array"> </div>
+
+</body>
+</html>
