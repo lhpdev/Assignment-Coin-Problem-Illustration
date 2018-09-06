@@ -6,3 +6,5 @@ Algoritmo Guloso
 e
 Programacao Dinamica
 
+/////////////////
+This project was part of a simple assingment which we illustreted the famous exchange sort algorith mainly using Javascript 
